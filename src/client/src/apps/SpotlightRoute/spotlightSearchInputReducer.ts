@@ -38,7 +38,7 @@ export const initialState: State = {
   historyPosition: -1,
 }
 
-export function reducer(currentState: State, action: Action): State {
+export function spotlightSearchInputReducer(currentState: State, action: Action): State {
   switch (action.type) {
     case 'SET_REQUEST':
       return {

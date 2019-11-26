@@ -9,7 +9,7 @@ import React, {
 } from 'react'
 import { styled } from 'rt-theme'
 import { AdaptiveLoader } from 'rt-components'
-import { initialState, reducer } from './reducer'
+import { initialState, spotlightSearchInputReducer } from './spotlightSearchInputReducer'
 import { useServiceStub } from './context'
 import { take, tap, timeout } from 'rxjs/operators'
 import { DetectIntentResponse } from 'dialogflow'
@@ -114,7 +114,7 @@ function getNonDirectoryAppsComponent(response: DetectIntentResponse, platform: 
 }
 
 export const Spotlight: FC = () => {
-  const [{ request, response, contacting }, dispatch] = useReducer(reducer, initialState)
+  const [{ request, response, contacting }, dispatch] = useReducer(spotlightSearchInputReducer, initialState)
   const [dirApps, setDirApps] = useState<SpotlightApplication[]>([])
   const serviceStub = useServiceStub()
   const platform = usePlatform()

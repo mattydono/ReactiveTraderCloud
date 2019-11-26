@@ -86,15 +86,15 @@ export const Input = styled.input`
   ${rules.appRegionNoDrag};
 `
 
-export const SearchResult = styled.div`
-  padding-left: 20px;
-  padding-right: 20px;
-  height: ${SEARCH_RESULT_HEIGHT}px;
-  background: none;
-  outline: none;
-  border: none;
-  font-size: 1rem;
-  font-style: italic;
-  opacity: 0.75;
-  ${rules.appRegionNoDrag};
-`
+// export const SearchResult = styled.div`
+//   padding-left: 20px;
+//   padding-right: 20px;
+//   height: ${SEARCH_RESULT_HEIGHT}px;
+//   background: none;
+//   outline: none;
+//   border: none;
+//   font-size: 1rem;
+//   font-style: italic;
+//   opacity: 0.75;
+//   ${rules.appRegionNoDrag};
+// `

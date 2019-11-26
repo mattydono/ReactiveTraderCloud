@@ -20,7 +20,7 @@ const host = process.env.BROKER_HOST || "localhost"
 const realm = process.env.WAMP_REALM || "com.weareadaptive.reactivetrader"
 const port = process.env.BROKER_PORT || 80
 
-const HOST_TYPE = "nlp"
+const HOST_TYPE = "nlp-vlad"
 const hostInstance = `${HOST_TYPE}.${uuid().substring(0, 4)}`
 const HEARTBEAT_INTERVAL_MS = 1000
 

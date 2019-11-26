@@ -21,3 +21,8 @@ export const getCurrentWindowBounds = async () => {
   const window = await fin.Window.getCurrent()
   return window.getBounds()
 }
+
+export const closeCurrentWindow = async () => {
+  const window = await fin.Window.getCurrent()
+  window.close()
+}
