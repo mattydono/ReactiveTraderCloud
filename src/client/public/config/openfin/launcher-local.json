@@ -14,7 +14,7 @@
             }
         },
         "saveWindowState": false,
-        "resizable": false,
+        "resizable": true,
         "shadow": true,
         "frame": false,
         "_comment": "Openfin Excel API preloaded below + added in appAssets (not included in standard OpenFin package)",
