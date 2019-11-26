@@ -1,4 +1,5 @@
 import { styled } from 'rt-theme';
+import { rules } from 'rt-styleguide';
 
 export const Suggestion = styled.div`
   padding: 10px 5px;
@@ -11,10 +12,12 @@ export const Suggestion = styled.div`
 `
 
 export const Response = styled.div`
+  margin: 10px;
   font-size: 1rem;
   font-style: italic;
   opacity: 0.59;
-  margin: 0.5rem 0 0;
+  text-align: center;
+  ${rules.appRegionNoDrag};
 `
 
 export const Contacting = styled.span`

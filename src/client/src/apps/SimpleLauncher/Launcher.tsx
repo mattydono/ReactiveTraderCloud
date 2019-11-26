@@ -28,7 +28,7 @@ import {
   RootContainer,
   SEARCH_RESULT_HEIGHT,
   ThemeSwitchContainer
-} from './launcherStyles'
+} from './styles'
 import { animateCurrentWindowSize, closeCurrentWindow, getCurrentWindowBounds } from './windowUtils';
 import { DetectIntentResponse } from 'dialogflow';
 import { take, tap, timeout } from 'rxjs/operators';
@@ -161,7 +161,7 @@ export const Launcher: React.FC = () => {
   }
 
   const inlineSuggestions = response && getInlineSuggestionsComponent(response, platform)
-
+  console.log(!!inlineSuggestions)
   return (
     <RootContainer>
       <LauncherGlobalStyle/>
