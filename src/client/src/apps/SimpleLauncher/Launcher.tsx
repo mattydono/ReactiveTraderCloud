@@ -26,7 +26,6 @@ import {
   LauncherGlobalStyle,
   LogoContainer,
   RootContainer,
-  SEARCH_RESULT_HEIGHT,
   ThemeSwitchContainer
 } from './styles'
 import { animateCurrentWindowSize, closeCurrentWindow, getCurrentWindowBounds } from './windowUtils';
@@ -36,6 +35,7 @@ import { useServiceStub } from '../SpotlightRoute/context';
 import { getInlineSuggestionsComponent, Response, ResponseLoader } from './spotlight';
 import { initialState, spotlightSearchInputReducer } from '../SpotlightRoute/spotlightSearchInputReducer';
 import { usePlatform } from 'rt-platforms';
+import Measure, { ContentRect, MeasuredComponentProps } from 'react-measure'
 
 library.add(faSignOutAlt)
 
@@ -109,13 +109,13 @@ export const Launcher: React.FC = () => {
         const value = e.currentTarget.value
         dispatch({ type: 'SEND_REQUEST', request: value })
 
-        animateCurrentWindowSize(
-          {
-            ...initialBounds,
-            height: initialBounds.height + INPUT_HEIGHT + 10 * SEARCH_RESULT_HEIGHT,
-          },
-          75,
-        )
+        // animateCurrentWindowSize(
+        //   {
+        //     ...initialBounds,
+        //     height: initialBounds.height + INPUT_HEIGHT + 10 * SEARCH_RESULT_HEIGHT,
+        //   },
+        //   75,
+        // )
 
         break
     }
@@ -146,6 +146,17 @@ export const Launcher: React.FC = () => {
     searchInput.current && searchInput.current.focus()
   }
 
+  const handleResponseSizeChange = (contentRect: ContentRect) => {
+    if(!initialBounds) {
+      return
+    }
+    animateCurrentWindowSize({
+      ...initialBounds,
+      height: initialBounds.height + INPUT_HEIGHT + (contentRect.bounds? contentRect.bounds.height:0)
+    })
+    // setIsSearchVisible(true)
+  }
+
   const handleFocus: FocusEventHandler<HTMLInputElement> = e => {
     e.currentTarget.setSelectionRange(0, e.currentTarget.value.length)
   }
@@ -161,7 +172,24 @@ export const Launcher: React.FC = () => {
   }
 
   const inlineSuggestions = response && getInlineSuggestionsComponent(response, platform)
-  console.log(!!inlineSuggestions)
+
+  const ResponseContent: React.FC<MeasuredComponentProps> = ({ measureRef }) => (
+    <Response ref={measureRef}>
+      {
+        contacting ?
+          <ResponseLoader/> :
+          response === null ?
+            ('Oops. Something went wrong')
+            :
+            (
+              <>
+                {inlineSuggestions}
+              </>
+            )
+      }
+    </Response>
+  )
+
   return (
     <RootContainer>
       <LauncherGlobalStyle/>
@@ -190,20 +218,12 @@ export const Launcher: React.FC = () => {
         onFocus={handleFocus}
         onKeyDown={handleOnKeyDown}/>
 
-      <Response>
-        {
-          contacting ?
-            <ResponseLoader/> :
-            response === null ?
-              ('Oops. Something went wrong')
-              :
-              (
-                <>
-                  {inlineSuggestions}
-                </>
-              )
-        }
-      </Response>
+      <Measure
+        children={((props: MeasuredComponentProps) => (
+          <ResponseContent {...props}/>
+        ))}
+        bounds
+        onResize={handleResponseSizeChange}/>
 
     </RootContainer>
   )
