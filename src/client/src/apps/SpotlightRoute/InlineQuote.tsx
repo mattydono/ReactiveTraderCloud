@@ -2,6 +2,12 @@ import React, { FC, useEffect, useState } from 'react'
 import { usePriceService } from './hooks'
 import { useServiceStub } from './context'
 import { SpotPriceTick } from '../MainRoute/widgets/spotTile/model'
+import { InlineIntent } from '../SimpleLauncher/spotlight';
+import styled from 'styled-components';
+
+const InlineQuoteContainer = styled.div`
+  font-size: 0.6875rem;
+`
 
 interface InlineQuoteProps {
   currencyPair: string
@@ -32,9 +38,13 @@ export const InlineQuote: FC<InlineQuoteProps> = ({ currencyPair }) => {
   const baseCcy = quote && quote.symbol.substring(0, 3)
   const counterCcy = quote && quote.symbol.substring(3)
 
-  return quote && quote.symbol ? (
-    <div>
-      1 {baseCcy} = {quote.mid} {counterCcy}
-    </div>
-  ) : null
+  return (
+    quote && quote.symbol ? (
+      <InlineIntent>
+        <InlineQuoteContainer>
+          1 {baseCcy} = {quote.mid} {counterCcy}
+        </InlineQuoteContainer>
+      </InlineIntent>
+    ) : null
+  )
 }

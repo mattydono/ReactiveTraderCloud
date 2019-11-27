@@ -9,6 +9,7 @@ import { Trade } from 'rt-types'
 // TODO - lift out
 import { TradesUpdate } from '../MainRoute/widgets/blotter/blotterService'
 import { BlotterFilters, filterBlotterTrades } from '../MainRoute/widgets/blotter'
+import { InlineIntent } from '../SimpleLauncher/spotlight';
 
 type TradeLookup = Map<number, Trade>
 
@@ -44,7 +45,6 @@ interface BlotterProps {
 
 export const InlineBlotter: FC<BlotterProps> = ({ filters }) => {
   const [trades, setTrades] = useState<Trade[]>([])
-  const [tradeCount, setTradeCount] = useState(0)
   const serviceStub = useServiceStub()
   const blotterService = useBlotterService(serviceStub)
 
@@ -72,10 +72,9 @@ export const InlineBlotter: FC<BlotterProps> = ({ filters }) => {
         const newTradeCount = result.length;
         const newTrades = result.slice(0, filters && typeof filters.count !== 'undefined' ? filters.count : MAX_TRADES,);
 
-        setTradeCount(newTradeCount)
         setTrades(newTrades)
 
-        console.info(`Showing ${trades.length} of ${tradeCount} trades.`)
+        console.info(`Showing ${newTrades.length} of ${newTradeCount} trades.`)
       }, console.error)
 
     return () => {
@@ -85,30 +84,34 @@ export const InlineBlotter: FC<BlotterProps> = ({ filters }) => {
     }
   }, [blotterService, filters])
 
+  if (!trades || (trades && trades.length === 0)) {
+    return null
+  }
+
   return (
-    <>
+    <InlineIntent>
       <Table>
         <thead>
-          <tr>
-            <th>Trade ID</th>
-            <th>Symbol</th>
-            <th>Notional</th>
-            <th>Trade Date</th>
-            <th>Status</th>
-          </tr>
+        <tr>
+          <th>Trade ID</th>
+          <th>Symbol</th>
+          <th>Notional</th>
+          <th>Trade Date</th>
+          <th>Status</th>
+        </tr>
         </thead>
         <tbody>
-          {trades.map(trade => (
-            <tr key={trade.tradeId}>
-              <td>{trade.tradeId}</td>
-              <td>{trade.symbol}</td>
-              <td>{numeral(trade.notional).format()}</td>
-              <td>{DateTime.fromJSDate(trade.tradeDate).toFormat('yyyy LLL dd')}</td>
-              <td>{trade.status}</td>
-            </tr>
-          ))}
+        {trades.map(trade => (
+          <tr key={trade.tradeId}>
+            <td>{trade.tradeId}</td>
+            <td>{trade.symbol}</td>
+            <td>{numeral(trade.notional).format()}</td>
+            <td>{DateTime.fromJSDate(trade.tradeDate).toFormat('yyyy LLL dd')}</td>
+            <td>{trade.status}</td>
+          </tr>
+        ))}
         </tbody>
       </Table>
-    </>
+    </InlineIntent>
   )
 }

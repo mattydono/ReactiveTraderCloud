@@ -1,4 +1,13 @@
-import React, { ChangeEvent, FocusEventHandler, useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import React, {
+  ChangeEvent,
+  FocusEventHandler,
+  KeyboardEventHandler,
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+  useState
+} from 'react'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import throttle from 'lodash/throttle'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -24,11 +33,10 @@ import { animateCurrentWindowSize, closeCurrentWindow, getCurrentWindowBounds } 
 import { DetectIntentResponse } from 'dialogflow';
 import { take, tap, timeout } from 'rxjs/operators';
 import { useServiceStub } from '../SpotlightRoute/context';
-import { getInlineSuggestionsComponent, Response, Suggestion } from './spotlight';
+import { getInlineSuggestionsComponent, Response } from './spotlight';
 import { initialState, launcherReducer } from './launcherReducer';
-import { Platform, usePlatform } from 'rt-platforms';
+import { usePlatform } from 'rt-platforms';
 import Measure, { ContentRect } from 'react-measure'
-import { mapIntent } from '../SpotlightRoute/responseMapper';
 import { handleIntent } from '../SpotlightRoute/handleIntent';
 
 library.add(faSignOutAlt)
@@ -41,11 +49,6 @@ const LauncherExit = () => (
     </LaunchButton>
   </ButtonContainer>
 )
-
-function getNonDirectoryAppsComponent(response: DetectIntentResponse, platform: Platform) {
-  const intent = mapIntent(response)
-  return <Suggestion onClick={() => handleIntent(response, platform)}>{intent}</Suggestion>
-}
 
 export const Launcher: React.FC = () => {
   const [{ request, response, contacting }, dispatch] = useReducer(launcherReducer, initialState)
@@ -68,7 +71,7 @@ export const Launcher: React.FC = () => {
       console.error(`Error creating subscription - serviceStub was not defined`)
       return
     }
-    console.log('seinding request', request)
+    console.log('sending request', request)
     dispatch({ type: 'SEND_REQUEST' })
 
     const subscription = serviceStub
@@ -99,6 +102,12 @@ export const Launcher: React.FC = () => {
     // The request variable is updated on every input change, hence why we remove it from the list of deps below
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [/*contacting, */serviceStub, request])
+
+  const handleOnKeyDown: KeyboardEventHandler<HTMLInputElement> = e => {
+    if (e.key === 'Enter' && response) {
+      handleIntent(response, platform)
+    }
+  }
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -133,9 +142,8 @@ export const Launcher: React.FC = () => {
     }
     animateCurrentWindowSize({
       ...initialBounds,
-      height: initialBounds.height + INPUT_HEIGHT + (contentRect.bounds ? contentRect.bounds.height : 0)
+      height: initialBounds.height + INPUT_HEIGHT + 17 + (contentRect.bounds ? contentRect.bounds.height : 0)
     })
-    // setIsSearchVisible(true)
   }
 
   const handleFocus: FocusEventHandler<HTMLInputElement> = e => {
@@ -147,11 +155,6 @@ export const Launcher: React.FC = () => {
       <LaunchButton onClick={showSearch}>{SearchIcon}</LaunchButton>
     </ButtonContainer>
   )
-
-  // const handleChange: ChangeEventHandler<HTMLInputElement> = e => {
-  //   const requestString = e.target.value;
-  //   dispatch({ type: 'SET_REQUEST', request: requestString })
-  // }
 
   const throttledSendRequest = useCallback(
     throttle(
@@ -172,17 +175,17 @@ export const Launcher: React.FC = () => {
       const requestString = e.target.value
       return throttledSendRequest(requestString)
     },
-    []
+    [throttledSendRequest]
   )
 
   const inlineSuggestions = response && getInlineSuggestionsComponent(response, platform)
-  const nonDirectoryAppSuggestions = response && getNonDirectoryAppsComponent(response, platform)
 
   const searchControls = <>
     <Input
       onChange={handleChange}
       ref={searchInput}
-      onFocus={handleFocus}/>
+      onFocus={handleFocus}
+      onKeyDown={handleOnKeyDown}/>
 
     {!!response && (
       <Measure
@@ -192,7 +195,6 @@ export const Launcher: React.FC = () => {
         {
           ({ measureRef }) => (
             <Response ref={measureRef}>
-              {nonDirectoryAppSuggestions}
               {inlineSuggestions}
             </Response>
           )
