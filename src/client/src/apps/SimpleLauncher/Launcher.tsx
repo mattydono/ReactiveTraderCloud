@@ -12,7 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons'
 import { appConfigs } from './applicationConfigurations'
 import { LaunchButton } from './LaunchButton'
-import { LogoIcon } from 'rt-components'
+import { AdaptiveLoader/*, LogoIcon*/ } from 'rt-components'
 import { ThemeStorageSwitch } from 'rt-theme'
 import { open } from './tools'
 import { Bounds } from 'openfin/_v2/shapes'
@@ -32,10 +32,12 @@ import { animateCurrentWindowSize, closeCurrentWindow, getCurrentWindowBounds } 
 import { DetectIntentResponse } from 'dialogflow';
 import { take, tap, timeout } from 'rxjs/operators';
 import { useServiceStub } from '../SpotlightRoute/context';
-import { getInlineSuggestionsComponent, Response, ResponseLoader } from './spotlight';
+import { getInlineSuggestionsComponent, Response, Suggestion/*, ResponseLoader*/ } from './spotlight';
 import { initialState, spotlightSearchInputReducer } from '../SpotlightRoute/spotlightSearchInputReducer';
-import { usePlatform } from 'rt-platforms';
+import { Platform, usePlatform } from 'rt-platforms';
 import Measure, { ContentRect, MeasuredComponentProps } from 'react-measure'
+import { mapIntent } from '../SpotlightRoute/responseMapper';
+import { handleIntent } from '../SpotlightRoute/handleIntent';
 
 library.add(faSignOutAlt)
 
@@ -47,6 +49,11 @@ const LauncherExit = () => (
     </LaunchButton>
   </ButtonContainer>
 )
+
+function getNonDirectoryAppsComponent(response: DetectIntentResponse, platform: Platform) {
+  const intent = mapIntent(response)
+  return <Suggestion onClick={() => handleIntent(response, platform)}>{intent}</Suggestion>
+}
 
 export const Launcher: React.FC = () => {
   const [{ request, response, contacting }, dispatch] = useReducer(spotlightSearchInputReducer, initialState)
@@ -108,15 +115,6 @@ export const Launcher: React.FC = () => {
 
         const value = e.currentTarget.value
         dispatch({ type: 'SEND_REQUEST', request: value })
-
-        // animateCurrentWindowSize(
-        //   {
-        //     ...initialBounds,
-        //     height: initialBounds.height + INPUT_HEIGHT + 10 * SEARCH_RESULT_HEIGHT,
-        //   },
-        //   75,
-        // )
-
         break
     }
   }
@@ -124,9 +122,11 @@ export const Launcher: React.FC = () => {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
+        dispatch({ type: 'RECEIVE_RESPONSE'})
         if (!isSearchVisible || !initialBounds) {
           return
         }
+        // TODO: move all state to reducer
         setIsSearchVisible(false)
         animateCurrentWindowSize(initialBounds)
       }
@@ -147,12 +147,12 @@ export const Launcher: React.FC = () => {
   }
 
   const handleResponseSizeChange = (contentRect: ContentRect) => {
-    if(!initialBounds) {
+    if (!initialBounds) {
       return
     }
     animateCurrentWindowSize({
       ...initialBounds,
-      height: initialBounds.height + INPUT_HEIGHT + (contentRect.bounds? contentRect.bounds.height:0)
+      height: initialBounds.height + INPUT_HEIGHT + (contentRect.bounds ? contentRect.bounds.height : 0)
     })
     // setIsSearchVisible(true)
   }
@@ -172,30 +172,40 @@ export const Launcher: React.FC = () => {
   }
 
   const inlineSuggestions = response && getInlineSuggestionsComponent(response, platform)
+  const nonDirectoryAppSuggestions = response && getNonDirectoryAppsComponent(response, platform)
 
   const ResponseContent: React.FC<MeasuredComponentProps> = ({ measureRef }) => (
     <Response ref={measureRef}>
-      {
-        contacting ?
-          <ResponseLoader/> :
-          response === null ?
-            ('Oops. Something went wrong')
-            :
-            (
-              <>
-                {inlineSuggestions}
-              </>
-            )
-      }
+      {nonDirectoryAppSuggestions}
+      {inlineSuggestions}
     </Response>
   )
+
+  const searchControls = <>
+    <Input
+      onChange={handleChange}
+      ref={searchInput}
+      onFocus={handleFocus}
+      onKeyDown={handleOnKeyDown}/>
+
+    {!!response && (
+      <Measure
+        children={((props: MeasuredComponentProps) => (
+          <ResponseContent {...props}/>
+        ))}
+        bounds
+        onResize={handleResponseSizeChange}
+      />
+    )}
+  </>;
 
   return (
     <RootContainer>
       <LauncherGlobalStyle/>
       <HorizontalContainer>
         <LogoContainer>
-          <LogoIcon width={1.3} height={1.3}/>
+          <AdaptiveLoader size={24} speed={contacting ? 0.8 : 0} seperation={1.5} type="secondary"/>
+          {/*<LogoIcon width={1.3} height={1.3}/>*/}
         </LogoContainer>
         <Spotlight/>
         {appConfigs.map(app => (
@@ -212,18 +222,7 @@ export const Launcher: React.FC = () => {
         </ThemeSwitchContainer>
       </HorizontalContainer>
 
-      <Input
-        onChange={handleChange}
-        ref={searchInput}
-        onFocus={handleFocus}
-        onKeyDown={handleOnKeyDown}/>
-
-      <Measure
-        children={((props: MeasuredComponentProps) => (
-          <ResponseContent {...props}/>
-        ))}
-        bounds
-        onResize={handleResponseSizeChange}/>
+      {isSearchVisible && searchControls}
 
     </RootContainer>
   )

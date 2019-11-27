@@ -33,15 +33,15 @@ interface BarProps {
   type: LoaderType
 }
 
-const Bar = styled('rect')<BarProps>`
-  animation: ${({ moveDistance }: BarProps) => getBounce(moveDistance)} ${({ speed }) => speed}s
-    infinite;
-  animation-delay: ${({ order, speed }) => order * (speed / 1.3 / BAR_NUMBER) - speed * 0.6}s;
+const Bar = styled('rect')<BarProps>` 
   fill: ${({ theme }) => theme.core.textColor};
   will-change: transform;
+  animation: ${({ moveDistance }: BarProps) => getBounce(moveDistance)} ${({ speed }: { speed: number }) => speed}s infinite; 
+  animation-delay: ${({ order, speed }: { order: number, speed: number }) => order * (speed / 1.3 / BAR_NUMBER) - speed * 0.6}s;   
 `
 
 type LoaderType = 'primary' | 'secondary'
+
 interface Props {
   size: number | string
   type?: LoaderType
@@ -62,16 +62,28 @@ const AdaptiveLoader: React.FC<Props> = React.memo(
     return (
       <svg width={sizeNum} height={sizeNum} data-qa="adaptive-loader__svg">
         {bars.map((item, i) => (
-          <Bar
-            type={type || 'primary'}
-            key={i}
-            height={barHeight}
-            width={barWidth}
-            x={extraWidth / 2 + i * (barWidth + seperationDistance)}
-            order={i}
-            moveDistance={moveDistance}
-            speed={speed || ANIMATION_SPEED}
-          />
+          speed === 0 ?
+            <Bar
+              type={type || 'primary'}
+              key={i}
+              height={barHeight}
+              width={barWidth}
+              x={extraWidth / 2 + i * (barWidth + seperationDistance)}
+              y={i === 0 ? 3 : i === 1 ? 4 : i === 2 ? 2 : 0}
+              order={i}
+              moveDistance={moveDistance}
+              speed={0}
+            /> :
+            <Bar
+              type={type || 'primary'}
+              key={i}
+              height={barHeight}
+              width={barWidth}
+              x={extraWidth / 2 + i * (barWidth + seperationDistance)}
+              order={i}
+              moveDistance={moveDistance}
+              speed={speed || ANIMATION_SPEED}
+            />
         ))}
         {children}
       </svg>

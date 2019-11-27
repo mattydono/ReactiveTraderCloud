@@ -69,13 +69,13 @@ export const InlineBlotter: FC<BlotterProps> = ({ filters }) => {
         map((trades: TradeLookup) => Array.from(trades.values()).reverse()),
       )
       .subscribe(result => {
-        setTradeCount(result.length)
-        setTrades(
-          result.slice(
-            0,
-            filters && typeof filters.count !== 'undefined' ? filters.count : MAX_TRADES,
-          ),
-        )
+        const newTradeCount = result.length;
+        const newTrades = result.slice(0, filters && typeof filters.count !== 'undefined' ? filters.count : MAX_TRADES,);
+
+        setTradeCount(newTradeCount)
+        setTrades(newTrades)
+
+        console.info(`Showing ${trades.length} of ${tradeCount} trades.`)
       }, console.error)
 
     return () => {
@@ -87,9 +87,6 @@ export const InlineBlotter: FC<BlotterProps> = ({ filters }) => {
 
   return (
     <>
-      <span>
-        Showing {trades.length} of {tradeCount} trades.
-      </span>
       <Table>
         <thead>
           <tr>

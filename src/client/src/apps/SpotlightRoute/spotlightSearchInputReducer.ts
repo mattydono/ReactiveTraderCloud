@@ -14,6 +14,9 @@ type Action =
       request: string
     }
   | {
+      type: 'CLEAR_RESPONSE'
+    }
+  | {
       type: 'SEND_REQUEST'
       request: string
     }
@@ -57,6 +60,12 @@ export function spotlightSearchInputReducer(currentState: State, action: Action)
             .slice(0, HISTORY_SIZE),
         ],
         historyPosition: -1,
+      }
+
+    case 'CLEAR_RESPONSE':
+      return {
+        ...currentState,
+        response: undefined
       }
 
     case 'RECEIVE_RESPONSE':
