@@ -51,10 +51,11 @@ const LauncherExit = () => (
 )
 
 export const Launcher: React.FC = () => {
-  const [{ request, response, contacting }, dispatch] = useReducer(launcherReducer, initialState)
+  const [{ request, response, contacting, isTyping }, dispatch] = useReducer(launcherReducer, initialState)
   const [initialBounds, setInitialBounds] = useState<Bounds>()
   const [isSearchVisible, setIsSearchVisible] = useState(false)
   const searchInput = useRef<HTMLInputElement>(null)
+  const typingTimeout = useRef<number>()
   const platform = usePlatform()
 
   const serviceStub = useServiceStub()
@@ -158,9 +159,7 @@ export const Launcher: React.FC = () => {
 
   const throttledSendRequest = useCallback(
     throttle(
-      (requestString: string) => {
-        dispatch({ type: 'SET_REQUEST', request: requestString })
-      },
+      (requestString: string) => dispatch({ type: 'SET_REQUEST', request: requestString }),
       250,
       {
         leading: false,
@@ -170,12 +169,31 @@ export const Launcher: React.FC = () => {
     []
   )
 
+  /**
+   * Sets start typing immediately and sets stops typing in timeouty
+   **/
+  const startTyping = useCallback(
+    () => {
+      if (typingTimeout.current) {
+        clearTimeout(typingTimeout.current)
+      }
+
+      dispatch({ type: 'STARTED_TYPING' });
+      typingTimeout.current = setTimeout(
+        () => dispatch({ type: 'STOPPED_TYPING' }),
+        350
+      )
+    },
+    []
+  )
+
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
+      startTyping()
       const requestString = e.target.value
-      return throttledSendRequest(requestString)
+      throttledSendRequest(requestString)
     },
-    [throttledSendRequest]
+    [throttledSendRequest, startTyping]
   )
 
   const inlineSuggestions = response && getInlineSuggestionsComponent(response, platform)
@@ -208,7 +226,7 @@ export const Launcher: React.FC = () => {
       <LauncherGlobalStyle/>
       <HorizontalContainer>
         <LogoContainer>
-          <AdaptiveLoader size={24} speed={contacting ? 0.8 : 0} seperation={1.5} type="secondary"/>
+          <AdaptiveLoader size={24} speed={(isTyping || contacting) ? 0.8 : 0} seperation={1.5} type="secondary"/>
           {/*<LogoIcon width={1.3} height={1.3}/>*/}
         </LogoContainer>
         <Spotlight/>

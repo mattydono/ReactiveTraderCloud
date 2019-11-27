@@ -2,30 +2,43 @@ import { DetectIntentResponse } from 'dialogflow'
 
 type State = {
   request: string
-  response?: DetectIntentResponse
   contacting: boolean
+  isTyping: boolean
+  response?: DetectIntentResponse
 }
 
 type Action =
-  | {
-  type: 'SET_REQUEST'
-  request: string
-}
-  | {
-  type: 'CLEAR_RESPONSE'
-}
-  | {
-  type: 'SEND_REQUEST'
-}
-  | {
-  type: 'RECEIVE_RESPONSE'
-  response?: DetectIntentResponse
-}
+  {
+    type: 'SET_REQUEST'
+    request: string
+  }
+  |
+  {
+    type: 'CLEAR_RESPONSE'
+  }
+  |
+  {
+    type: 'SEND_REQUEST'
+  }
+  |
+  {
+    type: 'RECEIVE_RESPONSE'
+    response?: DetectIntentResponse
+  }
+  |
+  {
+    type: 'STARTED_TYPING'
+  }
+  |
+  {
+    type: 'STOPPED_TYPING'
+  }
 
 export const initialState: State = {
   request: '',
   response: undefined,
-  contacting: false
+  contacting: false,
+  isTyping: false
 }
 
 export function launcherReducer(currentState: State, action: Action): State {
@@ -53,6 +66,18 @@ export function launcherReducer(currentState: State, action: Action): State {
         ...currentState,
         contacting: false,
         response: action.response,
+      }
+
+    case 'STARTED_TYPING':
+      return {
+        ...currentState,
+        isTyping: true
+      }
+
+    case 'STOPPED_TYPING':
+      return {
+        ...currentState,
+        isTyping: false
       }
 
     default:

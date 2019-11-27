@@ -37,6 +37,20 @@ export function getInlineSuggestionsComponent(response: DetectIntentResponse, pl
     </Suggestion>
   ) : null;
 
+  if (!quoteSuggestion && !blotterSuggestion) {
+
+    if (intent) {
+      return (
+        <Intent>
+          {intent}
+        </Intent>
+      )
+    }
+    return (
+      <div>No results</div>
+    )
+  }
+
   return (
     <>
       {quoteSuggestion}
