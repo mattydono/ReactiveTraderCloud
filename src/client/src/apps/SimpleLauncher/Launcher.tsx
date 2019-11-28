@@ -12,7 +12,6 @@ import {
   ButtonContainer,
   HorizontalContainer,
   IconTitle,
-  INPUT_HEIGHT,
   LauncherGlobalStyle,
   LogoContainer,
   RootContainer,
@@ -20,7 +19,7 @@ import {
 } from './styles'
 import { animateCurrentWindowSize, closeCurrentWindow, getCurrentWindowBounds } from './windowUtils';
 import Measure, { ContentRect } from 'react-measure'
-import { SearchControls } from './SearchControls';
+import { SearchControls, SearchState } from './SearchControls';
 
 library.add(faSignOutAlt)
 
@@ -43,7 +42,7 @@ export const Launcher: React.FC = () => {
   const [initialBounds, setInitialBounds] = useState<Bounds>()
   const [isSearchVisible, setIsSearchVisible] = useState<boolean>()
   const [isSearchBusy, setIsSearchBusy] = useState<boolean>()
-  const searchInput = useRef<HTMLInputElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     getCurrentWindowBounds().then(setInitialBounds)
@@ -54,19 +53,44 @@ export const Launcher: React.FC = () => {
     []
   );
 
+  // if search is made visible - focus on it
   useEffect(
     () => {
-      if (setIsSearchVisible) {
-        searchInput.current && searchInput.current.focus()
+      if (isSearchVisible) {
+        searchInputRef.current && searchInputRef.current.focus()
       }
     },
-    [setIsSearchVisible]
+    [isSearchVisible]
+  )
+
+  // resize window is search was hidden
+  useEffect(() => {
+      if (!initialBounds) {
+        console.warn(`Cant resize window - 'initialBounds' is not set yet`)
+        return
+      }
+      if (!isSearchVisible) {
+        animateCurrentWindowSize(initialBounds)
+      }
+    },
+    [isSearchVisible, initialBounds]
+  )
+
+  // hide search if Escape is pressed
+  useEffect(
+    () => {
+      const onKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+          setIsSearchVisible(false)
+        }
+      }
+      document.addEventListener('keydown', onKeyDown)
+      return () => document.removeEventListener('keydown', onKeyDown)
+    }, []
   )
 
   const handleSearchStateChange = useCallback(
-    (state:ActionSearchState) => {
-      setIsSearchBusy(state.typing || state.loading)
-    },
+    (state: SearchState) => setIsSearchBusy(state.typing || state.loading),
     []
   )
 
@@ -77,10 +101,10 @@ export const Launcher: React.FC = () => {
       }
       animateCurrentWindowSize({
         ...initialBounds,
-        height: initialBounds.height + INPUT_HEIGHT + 17 + (contentRect.bounds ? contentRect.bounds.height : 0)
+        height: initialBounds.height + (contentRect.bounds ? contentRect.bounds.height : 0)
       })
     },
-    []
+    [initialBounds]
   )
 
   return (
@@ -92,7 +116,7 @@ export const Launcher: React.FC = () => {
           <AdaptiveLoader size={24} speed={isSearchBusy ? 0.8 : 0} seperation={1.5} type="secondary"/>
           {/*<LogoIcon width={1.3} height={1.3}/>*/}
         </LogoContainer>
-        <SearchButton onClick={showSearch}/>>
+        <SearchButton onClick={showSearch}/>
         <LauncherApps/>
         <LauncherExit/>
         <ThemeSwitchContainer>
@@ -100,19 +124,22 @@ export const Launcher: React.FC = () => {
         </ThemeSwitchContainer>
       </HorizontalContainer>
 
-      {isSearchVisible && (
-        <Measure
-          bounds
-          onResize={handleSearchSizeChange}>
-          {
-            ({ measureRef }) => (
-              <SearchControls
-                ref={measureRef}
-                onStateChange={handleSearchStateChange}/>
-            )
-          }
-        </Measure>
-      )}}
+      {
+        isSearchVisible && (
+          <Measure
+            bounds
+            onResize={handleSearchSizeChange}>
+            {
+              ({ measureRef }) => (
+                <SearchControls
+                  ref={measureRef}
+                  searchInputRef={searchInputRef}
+                  onStateChange={handleSearchStateChange}/>
+              )
+            }
+          </Measure>
+        )
+      }
 
     </RootContainer>
   )
