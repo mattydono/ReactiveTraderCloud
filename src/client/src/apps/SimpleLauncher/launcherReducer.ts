@@ -4,6 +4,7 @@ type State = {
   request: string
   contacting: boolean
   isTyping: boolean
+  isSearchVisible: boolean
   response?: DetectIntentResponse
 }
 
@@ -27,18 +28,23 @@ type Action =
   }
   |
   {
-    type: 'STARTED_TYPING'
+    type: 'START_TYPING'
   }
   |
   {
-    type: 'STOPPED_TYPING'
+    type: 'STOP_TYPING'
+  } |
+  {
+    type: 'UPDATE_SEARCH_VISIBILITY',
+    visible: boolean
   }
 
 export const initialState: State = {
   request: '',
   response: undefined,
   contacting: false,
-  isTyping: false
+  isTyping: false,
+  isSearchVisible: false
 }
 
 export function launcherReducer(currentState: State, action: Action): State {
@@ -68,16 +74,22 @@ export function launcherReducer(currentState: State, action: Action): State {
         response: action.response,
       }
 
-    case 'STARTED_TYPING':
+    case 'START_TYPING':
       return {
         ...currentState,
         isTyping: true
       }
 
-    case 'STOPPED_TYPING':
+    case 'STOP_TYPING':
       return {
         ...currentState,
         isTyping: false
+      }
+
+    case 'UPDATE_SEARCH_VISIBILITY':
+      return {
+        ...currentState,
+        isSearchVisible: action.visible
       }
 
     default:

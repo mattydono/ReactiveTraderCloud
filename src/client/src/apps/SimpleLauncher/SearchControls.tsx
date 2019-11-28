@@ -14,22 +14,8 @@ import debounce from 'lodash/debounce'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons'
 import { LaunchButton } from './LaunchButton'
-import { LauncherApps } from './LauncherApps'
-import { AdaptiveLoader } from 'rt-components'
-import { ThemeStorageSwitch } from 'rt-theme'
 import { Bounds } from 'openfin/_v2/shapes'
-import SearchIcon from './icons/searchIcon'
-import {
-  ButtonContainer,
-  HorizontalContainer,
-  IconTitle,
-  Input,
-  INPUT_HEIGHT,
-  LauncherGlobalStyle,
-  LogoContainer,
-  RootContainer,
-  ThemeSwitchContainer
-} from './styles'
+import { ButtonContainer, IconTitle, Input, INPUT_HEIGHT } from './styles'
 import { animateCurrentWindowSize, closeCurrentWindow, getCurrentWindowBounds } from './windowUtils';
 import { DetectIntentResponse } from 'dialogflow';
 import { take, tap, timeout } from 'rxjs/operators';
@@ -39,17 +25,6 @@ import { initialState, launcherReducer } from './launcherReducer';
 import { usePlatform } from 'rt-platforms';
 import Measure, { ContentRect } from 'react-measure'
 import { handleIntent } from '../SpotlightRoute/handleIntent';
-
-library.add(faSignOutAlt)
-
-const LauncherExit = () => (
-  <ButtonContainer key="exit">
-    <LaunchButton onClick={closeCurrentWindow}>
-      <FontAwesomeIcon icon="sign-out-alt"/>
-      <IconTitle>Exit</IconTitle>
-    </LaunchButton>
-  </ButtonContainer>
-)
 
 export const Launcher: React.FC = () => {
   const [{ request, response, contacting, isTyping, isSearchVisible }, dispatch] = useReducer(launcherReducer, initialState)
@@ -198,49 +173,27 @@ export const Launcher: React.FC = () => {
 
   const inlineSuggestions = response && getInlineSuggestionsComponent(response, platform)
 
-  const searchControls = <>
-    <Input
-      onChange={handleChange}
-      ref={searchInput}
-      onFocus={handleFocus}
-      onKeyDown={handleOnKeyDown}/>
-
-    {response && (
-      <Measure
-        bounds
-        onResize={handleResponseSizeChange}>
-        {
-          ({ measureRef }) => (
-            <Response ref={measureRef}>
-              {inlineSuggestions}
-            </Response>
-          )
-        }
-      </Measure>
-    )}
-  </>;
-
   return (
-    <RootContainer>
-      <LauncherGlobalStyle/>
+    <>
+      <Input
+        onChange={handleChange}
+        ref={searchInput}
+        onFocus={handleFocus}
+        onKeyDown={handleOnKeyDown}/>
 
-      <HorizontalContainer>
-        <LogoContainer>
-          <AdaptiveLoader size={24} speed={(isTyping || contacting) ? 0.8 : 0} seperation={1.5} type="secondary"/>
-          {/*<LogoIcon width={1.3} height={1.3}/>*/}
-        </LogoContainer>
-        <ButtonContainer>
-          <LaunchButton onClick={showSearch}>{SearchIcon}</LaunchButton>
-        </ButtonContainer>
-        <LauncherApps/>
-        <LauncherExit/>
-        <ThemeSwitchContainer>
-          <ThemeStorageSwitch/>
-        </ThemeSwitchContainer>
-      </HorizontalContainer>
-
-      {isSearchVisible && searchControls}
-
-    </RootContainer>
+      {response && (
+        <Measure
+          bounds
+          onResize={handleResponseSizeChange}>
+          {
+            ({ measureRef }) => (
+              <Response ref={measureRef}>
+                {inlineSuggestions}
+              </Response>
+            )
+          }
+        </Measure>
+      )}
+    </>
   )
 }
