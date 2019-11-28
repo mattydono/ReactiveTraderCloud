@@ -8,15 +8,11 @@ import React, {
   useRef,
   useState
 } from 'react'
-import { library } from '@fortawesome/fontawesome-svg-core'
 import throttle from 'lodash/throttle'
 import debounce from 'lodash/debounce'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons'
-import { LaunchButton } from './LaunchButton'
 import { Bounds } from 'openfin/_v2/shapes'
-import { ButtonContainer, IconTitle, Input, INPUT_HEIGHT } from './styles'
-import { animateCurrentWindowSize, closeCurrentWindow, getCurrentWindowBounds } from './windowUtils';
+import { Input, INPUT_HEIGHT } from './styles'
+import { animateCurrentWindowSize, getCurrentWindowBounds } from './windowUtils';
 import { DetectIntentResponse } from 'dialogflow';
 import { take, tap, timeout } from 'rxjs/operators';
 import { useServiceStub } from '../SpotlightRoute/context';
@@ -26,13 +22,25 @@ import { usePlatform } from 'rt-platforms';
 import Measure, { ContentRect } from 'react-measure'
 import { handleIntent } from '../SpotlightRoute/handleIntent';
 
-export const Launcher: React.FC = () => {
+export type
+
+export const SearchControls: React.FC = () => {
   const [{ request, response, contacting, isTyping, isSearchVisible }, dispatch] = useReducer(launcherReducer, initialState)
   const [initialBounds, setInitialBounds] = useState<Bounds>()
   const searchInput = useRef<HTMLInputElement>(null)
   const platform = usePlatform()
 
   const serviceStub = useServiceStub()
+
+  useEffect(
+    () => {
+      onStateChange({
+        loading:contacting,
+        typing: isTyping
+      })
+    },
+    [contacting, isTyping, onStateChange]
+  )
 
   useEffect(() => {
     getCurrentWindowBounds().then(setInitialBounds)
@@ -95,21 +103,6 @@ export const Launcher: React.FC = () => {
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [initialBounds, isSearchVisible])
-
-  const showSearch = useCallback(
-    // need async, but useCallback does not allow async, so using IIFE
-    () => (async () => {
-      if (!initialBounds) {
-        return
-      }
-      if (!isSearchVisible) {
-        await animateCurrentWindowSize({ ...initialBounds, height: initialBounds.height + INPUT_HEIGHT })
-        dispatch({ type: 'UPDATE_SEARCH_VISIBILITY', visible: true })
-      }
-      searchInput.current && searchInput.current.focus()
-    })(),
-    [initialBounds, isSearchVisible]
-  );
 
   const handleResponseSizeChange = (contentRect: ContentRect) => {
     if (!initialBounds) {
