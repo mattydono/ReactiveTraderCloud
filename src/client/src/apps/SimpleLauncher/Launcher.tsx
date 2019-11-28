@@ -49,8 +49,13 @@ export const Launcher: React.FC = () => {
   }, [])
 
   const showSearch = useCallback(
-    () => setIsSearchVisible(true),
-    []
+    () => {
+      if (isSearchVisible) {
+        searchInputRef.current && searchInputRef.current.focus()
+      }
+      setIsSearchVisible(true)
+    },
+    [isSearchVisible]
   );
 
   // if search is made visible - focus on it
