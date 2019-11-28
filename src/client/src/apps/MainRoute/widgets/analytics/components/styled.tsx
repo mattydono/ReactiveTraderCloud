@@ -100,6 +100,7 @@ export const AnalyticsLineChartWrapper = styled.div`
 export const Header = styled.div`
   display: flex;
   justify-content: space-between;
+  margin-top: 10px;
   margin-bottom: 0.5rem;
 `
 
