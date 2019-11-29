@@ -4,7 +4,7 @@ import debounce from 'lodash/debounce'
 import { Input, SearchContainer } from './styles'
 import { DetectIntentResponse } from 'dialogflow';
 import { take, timeout } from 'rxjs/operators';
-import { useServiceStub } from '../SpotlightRoute/context';
+import { useServiceStub } from '../SpotlightRoute/useServiceStab';
 import { getInlineSuggestionsComponent, Response } from './spotlight';
 import { usePlatform } from 'rt-platforms';
 import { handleIntent } from '../SpotlightRoute/handleIntent';

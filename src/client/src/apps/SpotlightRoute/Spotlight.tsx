@@ -10,7 +10,7 @@ import React, {
 import { styled } from 'rt-theme'
 import { AdaptiveLoader } from 'rt-components'
 import { initialState, spotlightSearchInputReducer } from './spotlightSearchInputReducer'
-import { useServiceStub } from './context'
+import { useServiceStub } from './useServiceStab'
 import { take, tap, timeout } from 'rxjs/operators'
 import { DetectIntentResponse } from 'dialogflow'
 import { Platform, usePlatform } from 'rt-platforms'
@@ -96,12 +96,12 @@ function getInlineSuggestionsComponent(response: DetectIntentResponse, platform:
     <>
       {isSpotQuoteIntent(response) && currencyPair ? (
         <Suggestion onClick={() => handleIntent(response, platform)}>
-          <InlineQuote currencyPair={currencyPair} />
+          <InlineQuote currencyPair={currencyPair}/>
         </Suggestion>
       ) : null}
       {isTradeIntent(response) ? (
         <Suggestion onClick={() => handleIntent(response, platform)}>
-          <InlineBlotter filters={blotterFilter} />
+          <InlineBlotter filters={blotterFilter}/>
         </Suggestion>
       ) : null}
     </>
@@ -196,7 +196,7 @@ export const Spotlight: FC = () => {
 
   const loader = (
     <>
-      <AdaptiveLoader size={14} speed={0.8} seperation={1.5} type="secondary" />
+      <AdaptiveLoader size={14} speed={0.8} seperation={1.5} type="secondary"/>
       <Contacting>Contacting…</Contacting>
     </>
   )

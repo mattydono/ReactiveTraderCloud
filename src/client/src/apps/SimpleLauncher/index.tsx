@@ -7,7 +7,8 @@ import { getPlatformAsync, PlatformProvider } from 'rt-platforms';
 import { getFdc3 } from '../SpotlightRoute/fdc3/fdc3';
 import { AutobahnConnectionProxy } from '../../rt-system';
 import { Fdc3Provider } from '../SpotlightRoute/fdc3/context';
-import { ServiceStubProvider } from '../SpotlightRoute/context';
+import { BlotterServiceProvider, ServiceStubProvider } from '../SpotlightRoute/context';
+import BlotterService from '../MainRoute/widgets/blotter/blotterService';
 
 const autobahn = new AutobahnConnectionProxy(
   process.env.REACT_APP_BROKER_HOST || location.hostname,
@@ -20,13 +21,17 @@ export const SimpleLauncher: React.FC = () => {
   const [platform, setPlatform] = useState()
   const [fdc3, setFdc3] = useState()
   const [serviceStub, setServiceStub] = useState()
+  const [blotterService, setBlotterService] = useState<BlotterService>()
 
   useEffect(() => {
     const bootstrap = async () => {
       const serviceStubResult = createServiceStub(autobahn)
       const platformResult = await getPlatformAsync()
       const fdc3Result = await getFdc3()
+      const blotterService = new BlotterService(serviceStubResult)
+
       setServiceStub(serviceStubResult)
+      setBlotterService(blotterService)
       setPlatform(platformResult)
       setFdc3(fdc3Result)
     }
@@ -41,11 +46,13 @@ export const SimpleLauncher: React.FC = () => {
   return (
     <ThemeProvider>
       <ServiceStubProvider value={serviceStub}>
-        <Fdc3Provider value={fdc3}>
-          <PlatformProvider value={platform}>
-            <Launcher/>
-          </PlatformProvider>
-        </Fdc3Provider>
+        <BlotterServiceProvider value={blotterService}>
+          <Fdc3Provider value={fdc3}>
+            <PlatformProvider value={platform}>
+              <Launcher/>
+            </PlatformProvider>
+          </Fdc3Provider>
+        </BlotterServiceProvider>
       </ServiceStubProvider>
     </ThemeProvider>
   )

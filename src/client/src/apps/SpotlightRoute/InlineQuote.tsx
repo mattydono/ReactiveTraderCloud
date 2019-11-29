@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from 'react'
-import { usePriceService } from './hooks'
-import { useServiceStub } from './context'
+import { usePriceService } from './usePriceService'
+import { useServiceStub } from './useServiceStab'
 import { SpotPriceTick } from '../MainRoute/widgets/spotTile/model'
 import { InlineIntent } from '../SimpleLauncher/spotlight';
 import styled from 'styled-components';

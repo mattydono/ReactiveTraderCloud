@@ -1,9 +1,9 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import { ServiceStubWithLoadBalancer } from 'rt-system'
+import BlotterService from '../MainRoute/widgets/blotter/blotterService';
 
-const ServiceStubContext = React.createContext<ServiceStubWithLoadBalancer | undefined>(undefined)
+export const ServiceStubContext = React.createContext<ServiceStubWithLoadBalancer | undefined>(undefined)
 export const { Provider: ServiceStubProvider } = ServiceStubContext
 
-export function useServiceStub() {
-  return useContext(ServiceStubContext)
-}
+export const BlotterServiceContext = React.createContext<BlotterService | undefined>(undefined)
+export const { Provider: BlotterServiceProvider } = BlotterServiceContext

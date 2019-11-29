@@ -2,14 +2,13 @@ import React, { FC, useEffect, useState } from 'react'
 import numeral from 'numeral'
 import { DateTime } from 'luxon'
 import { map, scan } from 'rxjs/operators'
-import { useBlotterService } from './hooks'
-import { useServiceStub } from './context'
 import { Trade } from 'rt-types'
 // TODO - lift out
 import { TradesUpdate } from '../MainRoute/widgets/blotter/blotterService'
 import { BlotterFilters, filterBlotterTrades } from '../MainRoute/widgets/blotter'
 import { InlineIntent } from '../SimpleLauncher/spotlight';
 import { Table } from './styles';
+import { useBlotterService } from './useBlotterService';
 
 type TradeLookup = Map<number, Trade>
 
@@ -21,14 +20,14 @@ interface BlotterProps {
 
 export const InlineBlotter: FC<BlotterProps> = ({ filters }) => {
   const [trades, setTrades] = useState<Trade[]>([])
-  const serviceStub = useServiceStub()
-  const blotterService = useBlotterService(serviceStub)
+  const blotterService = useBlotterService()
 
   useEffect(() => {
     if (!blotterService) {
-      return
+      console.error(`BlotterService was not provided`)
+      return;
     }
-    const subscription = blotterService
+    const subscription = blotterService && blotterService
       .getTradesStream()
       .pipe(
         map((tradeUpdate: TradesUpdate) =>
