@@ -1,12 +1,4 @@
-import React, {
-  ChangeEvent,
-  FocusEventHandler,
-  KeyboardEventHandler,
-  RefObject,
-  useCallback,
-  useEffect,
-  useState
-} from 'react'
+import React, { ChangeEvent, FocusEventHandler, KeyboardEventHandler, useCallback, useEffect, useState } from 'react'
 import throttle from 'lodash/throttle'
 import debounce from 'lodash/debounce'
 import { Input } from './styles'
@@ -24,11 +16,10 @@ export type SearchState = {
 
 export interface SearchControlsProps {
   onStateChange: (state: SearchState) => void
-  searchInputRef: RefObject<HTMLInputElement>
 }
 
-export const SearchControls = React.forwardRef<HTMLDivElement, SearchControlsProps>(
-  ({ onStateChange, searchInputRef }, ref) => {
+export const SearchControls = React.forwardRef<HTMLInputElement, SearchControlsProps>(
+  ({ onStateChange }, ref) => {
     const [isTyping, setIsTyping] = useState(false)
     const [response, setResponse] = useState<DetectIntentResponse>()
     const [contacting, setContacting] = useState(false)
@@ -129,10 +120,10 @@ export const SearchControls = React.forwardRef<HTMLDivElement, SearchControlsPro
     const inlineSuggestions = response && getInlineSuggestionsComponent(response, platform)
 
     return (
-      <div ref={ref}>
+      <div>
         <Input
           onChange={handleChange}
-          ref={searchInputRef}
+          ref={ref}
           onFocus={handleFocus}
           onKeyDown={handleOnKeyDown}/>
 
