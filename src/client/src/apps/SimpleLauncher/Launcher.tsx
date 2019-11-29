@@ -40,7 +40,7 @@ const SearchButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
 
 export const Launcher: React.FC = () => {
   const [initialBounds, setInitialBounds] = useState<Bounds>()
-  const [isSearchVisible, setIsSearchVisible] = useState<boolean>()
+  const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false)
   const [isSearchBusy, setIsSearchBusy] = useState<boolean>()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
@@ -51,7 +51,7 @@ export const Launcher: React.FC = () => {
   const showSearch = useCallback(
     () => {
       if (isSearchVisible) {
-        searchInputRef.current && searchInputRef.current.focus()
+        searchInputRef.current && searchInputRef.current.focus({ preventScroll: true })
       }
       setIsSearchVisible(true)
     },
@@ -62,23 +62,10 @@ export const Launcher: React.FC = () => {
   useEffect(
     () => {
       if (isSearchVisible) {
-        searchInputRef.current && searchInputRef.current.focus()
+        searchInputRef.current && searchInputRef.current.focus({ preventScroll: true })
       }
     },
     [isSearchVisible]
-  )
-
-  // resize window is search was hidden
-  useEffect(() => {
-      if (!initialBounds) {
-        console.warn(`Cant resize window - 'initialBounds' is not set yet`)
-        return
-      }
-      if (!isSearchVisible) {
-        animateCurrentWindowSize(initialBounds)
-      }
-    },
-    [isSearchVisible, initialBounds]
   )
 
   // hide search if Escape is pressed
@@ -129,22 +116,19 @@ export const Launcher: React.FC = () => {
         </ThemeSwitchContainer>
       </HorizontalContainer>
 
-      {
-        isSearchVisible && (
-          <Measure
-            bounds
-            onResize={handleSearchSizeChange}>
-            {
-              ({ measureRef }) => (
-                <SearchControls
-                  ref={measureRef}
-                  searchInputRef={searchInputRef}
-                  onStateChange={handleSearchStateChange}/>
-              )
-            }
-          </Measure>
-        )
-      }
+      <Measure
+        bounds
+        onResize={handleSearchSizeChange}>
+        {({ measureRef }) => (
+          <div ref={measureRef}>
+            {isSearchVisible && (
+              <SearchControls
+                searchInputRef={searchInputRef}
+                onStateChange={handleSearchStateChange}/>
+            )}
+          </div>
+        )}
+      </Measure>
 
     </RootContainer>
   )
