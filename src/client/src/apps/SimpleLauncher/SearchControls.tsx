@@ -1,7 +1,7 @@
 import React, { ChangeEvent, FocusEventHandler, KeyboardEventHandler, useCallback, useEffect, useState } from 'react'
 import throttle from 'lodash/throttle'
 import debounce from 'lodash/debounce'
-import { Input } from './styles'
+import { Input, SearchContainer } from './styles'
 import { DetectIntentResponse } from 'dialogflow';
 import { take, timeout } from 'rxjs/operators';
 import { useServiceStub } from '../SpotlightRoute/context';
@@ -120,7 +120,7 @@ export const SearchControls = React.forwardRef<HTMLInputElement, SearchControlsP
     const inlineSuggestions = response && getInlineSuggestionsComponent(response, platform)
 
     return (
-      <div>
+      <SearchContainer>
         <Input
           onChange={handleChange}
           ref={ref}
@@ -132,6 +132,6 @@ export const SearchControls = React.forwardRef<HTMLInputElement, SearchControlsP
             {inlineSuggestions}
           </Response>
         )}
-      </div>
+      </SearchContainer>
     )
   })

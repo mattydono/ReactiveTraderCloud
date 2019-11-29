@@ -85,7 +85,11 @@ export const InlineBlotter: FC<BlotterProps> = ({ filters }) => {
   }, [blotterService, filters])
 
   if (!trades || (trades && trades.length === 0)) {
-    return null
+    return (
+      <InlineIntent>
+        No last trades
+      </InlineIntent>
+    )
   }
 
   return (

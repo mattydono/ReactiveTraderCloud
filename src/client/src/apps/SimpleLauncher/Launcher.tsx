@@ -93,7 +93,7 @@ export const Launcher: React.FC = () => {
       }
       animateCurrentWindowSize({
         ...initialBounds,
-        height: initialBounds.height + 10 + (contentRect.bounds ? contentRect.bounds.height : 0)
+        height: initialBounds.height + (contentRect.bounds ? contentRect.bounds.height : 0)
       })
     },
     [initialBounds]

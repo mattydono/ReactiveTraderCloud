@@ -2,9 +2,6 @@ import { styled } from 'rt-theme';
 import { rules } from 'rt-styleguide';
 import { createGlobalStyle } from 'styled-components';
 
-export const INPUT_HEIGHT = 40
-export const SEARCH_RESULT_HEIGHT = 30
-
 export const LauncherGlobalStyle = createGlobalStyle`
 :root, body {
   @media all {
@@ -75,9 +72,7 @@ export const LogoContainer = styled(IconContainer)`
 `
 
 export const Input = styled.input`
-  padding: 8px;
   width: 100%;
-  height: ${INPUT_HEIGHT}px;
   background: none;
   outline: none;
   border: none;
@@ -85,15 +80,6 @@ export const Input = styled.input`
   ${rules.appRegionNoDrag};
 `
 
-// export const SearchResult = styled.div`
-//   padding-left: 20px;
-//   padding-right: 20px;
-//   height: ${SEARCH_RESULT_HEIGHT}px;
-//   background: none;
-//   outline: none;
-//   border: none;
-//   font-size: 1rem;
-//   font-style: italic;
-//   opacity: 0.75;
-//   ${rules.appRegionNoDrag};
-// `
+export const SearchContainer = styled.div`
+  padding: 7px;
+`

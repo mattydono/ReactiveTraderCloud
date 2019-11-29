@@ -4,7 +4,7 @@ import { rules } from 'rt-styleguide';
 export const Suggestion = styled.div`
   display: flex;
   flex-direction: row;
-  padding: 10px 5px;
+  padding: 5px 2px;
   line-height: 1rem;
   cursor: pointer;
   background-color: ${({ theme }) => theme.core.lightBackground};
@@ -14,12 +14,11 @@ export const Suggestion = styled.div`
 `
 
 export const Response = styled.div`
-  margin-left: 5px;
-  margin-right: 5px;
+  padding-top: 5px;
+  padding-left: 15px;
   font-size: 1rem;
   font-style: italic;
   opacity: 0.59;
-  text-align: center;
   ${rules.appRegionNoDrag};
 `
 
@@ -28,10 +27,7 @@ export const Intent = styled.div`
 `
 
 export const InlineIntent = styled.div`
+  font-size: 0.6875rem;
   padding-left: 15px;
   border-left: solid;
-`
-
-export const Contacting = styled.span`
-  margin-left: 0.5rem;
 `
