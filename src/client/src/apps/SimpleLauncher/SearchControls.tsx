@@ -117,8 +117,6 @@ export const SearchControls = React.forwardRef<HTMLInputElement, SearchControlsP
       [throttledSendRequest, debouncedStopTyping]
     )
 
-    const inlineSuggestions = response && getInlineSuggestionsComponent(response, platform)
-
     return (
       <SearchContainer>
         <Input
@@ -129,7 +127,7 @@ export const SearchControls = React.forwardRef<HTMLInputElement, SearchControlsP
 
         {response && (
           <Response>
-            {inlineSuggestions}
+            {response && getInlineSuggestionsComponent(response, platform)}
           </Response>
         )}
       </SearchContainer>

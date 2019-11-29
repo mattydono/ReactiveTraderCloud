@@ -1,7 +1,6 @@
 import React, { FC, useEffect, useState } from 'react'
 import numeral from 'numeral'
 import { DateTime } from 'luxon'
-import styled from 'styled-components'
 import { map, scan } from 'rxjs/operators'
 import { useBlotterService } from './hooks'
 import { useServiceStub } from './context'
@@ -10,34 +9,11 @@ import { Trade } from 'rt-types'
 import { TradesUpdate } from '../MainRoute/widgets/blotter/blotterService'
 import { BlotterFilters, filterBlotterTrades } from '../MainRoute/widgets/blotter'
 import { InlineIntent } from '../SimpleLauncher/spotlight';
+import { Table } from './styles';
 
 type TradeLookup = Map<number, Trade>
 
 const MAX_TRADES = 20
-
-const Table = styled.table`
-  font-size: 0.6875rem;
-  th,
-  td {
-    text-align: left;
-    width: 100px;
-    padding: 0 5px;
-  }
-
-  thead tr {
-    text-transform: uppercase;
-  }
-
-  tbody {
-    tr:nth-child(odd) {
-      background-color: ${({ theme }) => theme.core.darkBackground};
-    }
-
-    tr:nth-child(even) {
-      background-color: ${({ theme }) => theme.core.alternateBackground};
-    }
-  }
-`
 
 interface BlotterProps {
   readonly filters?: BlotterFilters
@@ -75,7 +51,9 @@ export const InlineBlotter: FC<BlotterProps> = ({ filters }) => {
         setTrades(newTrades)
 
         console.info(`Showing ${newTrades.length} of ${newTradeCount} trades.`)
-      }, console.error)
+      }, (error) => {
+        console.error(`Error subscribing to inline blotter service: ${error}`)
+      })
 
     return () => {
       if (subscription) {
