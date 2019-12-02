@@ -1,65 +1,18 @@
-import React, { FC, useEffect, useState } from 'react'
+import React, { FC } from 'react'
 import numeral from 'numeral'
 import { DateTime } from 'luxon'
-import { map, scan } from 'rxjs/operators'
-import { Trade } from 'rt-types'
 // TODO - lift out
-import { TradesUpdate } from '../MainRoute/widgets/blotter/blotterService'
-import { BlotterFilters, filterBlotterTrades } from '../MainRoute/widgets/blotter'
+import { BlotterFilters } from '../MainRoute/widgets/blotter'
 import { InlineIntent } from '../SimpleLauncher/spotlight';
 import { Table } from './styles';
-import { useBlotterService } from './useBlotterService';
-
-type TradeLookup = Map<number, Trade>
-
-const MAX_TRADES = 20
+import { useBlotterTrades } from './useBlotterTrades';
 
 interface BlotterProps {
   readonly filters?: BlotterFilters
 }
 
 export const InlineBlotter: FC<BlotterProps> = ({ filters }) => {
-  const [trades, setTrades] = useState<Trade[]>([])
-  const blotterService = useBlotterService()
-
-  useEffect(() => {
-    if (!blotterService) {
-      console.error(`BlotterService was not provided`)
-      return;
-    }
-    const subscription = blotterService && blotterService
-      .getTradesStream()
-      .pipe(
-        map((tradeUpdate: TradesUpdate) =>
-          filterBlotterTrades(tradeUpdate.trades, {
-            ...filters,
-            // get all trades and then limit in the end (so that we can show user how many filtered out)
-            count: undefined,
-          }),
-        ),
-        scan<ReadonlyArray<Trade>, Map<number, Trade>>((acc, trades) => {
-          trades.forEach(trade => acc.set(trade.tradeId, trade))
-          return acc
-        }, new Map<number, Trade>()),
-        map((trades: TradeLookup) => Array.from(trades.values()).reverse()),
-      )
-      .subscribe(result => {
-        const newTradeCount = result.length;
-        const newTrades = result.slice(0, filters && typeof filters.count !== 'undefined' ? filters.count : MAX_TRADES,);
-
-        setTrades(newTrades)
-
-        console.info(`Showing ${newTrades.length} of ${newTradeCount} trades.`)
-      }, (error) => {
-        console.error(`Error subscribing to inline blotter service: ${error}`)
-      })
-
-    return () => {
-      if (subscription) {
-        subscription.unsubscribe()
-      }
-    }
-  }, [blotterService, filters])
+  const trades = useBlotterTrades(filters);
 
   if (!trades || (trades && trades.length === 0)) {
     return (

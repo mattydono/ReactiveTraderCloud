@@ -7,8 +7,9 @@ import { getPlatformAsync, PlatformProvider } from 'rt-platforms';
 import { getFdc3 } from '../SpotlightRoute/fdc3/fdc3';
 import { AutobahnConnectionProxy } from '../../rt-system';
 import { Fdc3Provider } from '../SpotlightRoute/fdc3/context';
-import { BlotterServiceProvider, ServiceStubProvider } from '../SpotlightRoute/context';
-import BlotterService from '../MainRoute/widgets/blotter/blotterService';
+import { BlotterServiceProvider, BlotterUpdatesStreamProvider, ServiceStubProvider } from '../SpotlightRoute/context';
+import BlotterService, { TradesUpdate } from '../MainRoute/widgets/blotter/blotterService';
+import { Observable, ReplaySubject } from 'rxjs';
 
 const autobahn = new AutobahnConnectionProxy(
   process.env.REACT_APP_BROKER_HOST || location.hostname,
@@ -22,6 +23,7 @@ export const SimpleLauncher: React.FC = () => {
   const [fdc3, setFdc3] = useState()
   const [serviceStub, setServiceStub] = useState()
   const [blotterService, setBlotterService] = useState<BlotterService>()
+  const [blotterUpdatesStream, setBlotterUpdatesStream] = useState<Observable<TradesUpdate>>()
 
   useEffect(() => {
     const bootstrap = async () => {
@@ -29,9 +31,13 @@ export const SimpleLauncher: React.FC = () => {
       const platformResult = await getPlatformAsync()
       const fdc3Result = await getFdc3()
       const blotterService = new BlotterService(serviceStubResult)
+      const blotterUpdates$ = blotterService.getTradesStream()
+      const blotterUpdatesSubject$ = new ReplaySubject<TradesUpdate>();
+      blotterUpdates$.subscribe(blotterUpdatesSubject$)
+      setBlotterUpdatesStream(blotterUpdatesSubject$)
 
-      setServiceStub(serviceStubResult)
       setBlotterService(blotterService)
+      setServiceStub(serviceStubResult)
       setPlatform(platformResult)
       setFdc3(fdc3Result)
     }
@@ -47,11 +53,13 @@ export const SimpleLauncher: React.FC = () => {
     <ThemeProvider>
       <ServiceStubProvider value={serviceStub}>
         <BlotterServiceProvider value={blotterService}>
-          <Fdc3Provider value={fdc3}>
-            <PlatformProvider value={platform}>
-              <Launcher/>
-            </PlatformProvider>
-          </Fdc3Provider>
+          <BlotterUpdatesStreamProvider value={blotterUpdatesStream}>
+            <Fdc3Provider value={fdc3}>
+              <PlatformProvider value={platform}>
+                <Launcher/>
+              </PlatformProvider>
+            </Fdc3Provider>
+          </BlotterUpdatesStreamProvider>
         </BlotterServiceProvider>
       </ServiceStubProvider>
     </ThemeProvider>
