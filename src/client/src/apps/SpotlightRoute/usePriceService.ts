@@ -1,7 +1,7 @@
-import { ServiceClient } from 'rt-system'
 import PricingService from '../MainRoute/widgets/spotTile/epics/pricingService'
-import { useServiceFactory } from './useServiceFactory';
+import { useContext } from 'react';
+import { PricingServiceContext } from './context';
 
-export const usePriceService = (serviceStub?: ServiceClient): PricingService | undefined => {
-  return useServiceFactory(PricingService, serviceStub)
+export const usePriceService = (): PricingService | undefined => {
+  return useContext(PricingServiceContext)
 }

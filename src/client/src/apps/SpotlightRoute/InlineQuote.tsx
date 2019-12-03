@@ -1,6 +1,5 @@
 import React, { FC, useEffect, useState } from 'react'
 import { usePriceService } from './usePriceService'
-import { useServiceStub } from './useServiceStab'
 import { SpotPriceTick } from '../MainRoute/widgets/spotTile/model'
 import { InlineIntent } from '../SimpleLauncher/spotlight';
 import styled from 'styled-components';
@@ -15,8 +14,7 @@ interface InlineQuoteProps {
 
 export const InlineQuote: FC<InlineQuoteProps> = ({ currencyPair }) => {
   const [quote, setQuote] = useState<SpotPriceTick>()
-  const serviceStub = useServiceStub()
-  const priceService = usePriceService(serviceStub)
+  const priceService = usePriceService()
 
   useEffect(() => {
     if (!priceService) {

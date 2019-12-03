@@ -1,10 +1,9 @@
 import { useContext, useEffect, useState } from 'react'
 import { map, scan } from 'rxjs/operators'
 import { Trade } from 'rt-types'
-// TODO - lift out
 import { TradesUpdate } from '../MainRoute/widgets/blotter/blotterService'
 import { BlotterFilters, filterBlotterTrades } from '../MainRoute/widgets/blotter'
-import { BlotterUpdatesStreamContext } from './context';
+import { TradeUpdatesContext } from './context';
 
 type TradeLookup = Map<number, Trade>
 
@@ -12,8 +11,7 @@ const MAX_TRADES = 20
 
 export const useBlotterTrades = (filters?: BlotterFilters) => {
   const [trades, setTrades] = useState<Trade[]>([])
-  // const blotterService = useBlotterService()
-  const trades$ = useContext(BlotterUpdatesStreamContext)
+  const trades$ = useContext(TradeUpdatesContext)
 
   useEffect(() => {
       if (!trades$) {

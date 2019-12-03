@@ -2,12 +2,10 @@ import React, { ChangeEvent, FocusEventHandler, KeyboardEventHandler, useCallbac
 import throttle from 'lodash/throttle'
 import debounce from 'lodash/debounce'
 import { Input, SearchContainer } from './styles'
-import { DetectIntentResponse } from 'dialogflow';
-import { take, timeout } from 'rxjs/operators';
-import { useServiceStub } from '../SpotlightRoute/useServiceStab';
 import { getInlineSuggestionsComponent, Response } from './spotlight';
 import { usePlatform } from 'rt-platforms';
 import { handleIntent } from '../SpotlightRoute/handleIntent';
+import { useNlpService } from './useNlpService';
 
 export type SearchState = {
   loading: boolean,
@@ -21,11 +19,8 @@ export interface SearchControlsProps {
 export const SearchControls = React.forwardRef<HTMLInputElement, SearchControlsProps>(
   ({ onStateChange }, ref) => {
     const [isTyping, setIsTyping] = useState(false)
-    const [response, setResponse] = useState<DetectIntentResponse>()
-    const [contacting, setContacting] = useState(false)
-
     const platform = usePlatform()
-    const serviceStub = useServiceStub()
+    const [contacting, response, sendRequest] = useNlpService()
 
     useEffect(
       () => {
@@ -36,43 +31,6 @@ export const SearchControls = React.forwardRef<HTMLInputElement, SearchControlsP
       },
       [contacting, isTyping, onStateChange]
     )
-
-    const sendRequest = useCallback((requestString: string) => {
-      if (!requestString) {
-        console.warn(`Skipping sending the request - request string is empty`)
-        return
-      }
-      if (!serviceStub) {
-        console.error(`Error creating subscription - serviceStub was not defined`)
-        return
-      }
-      console.info('Sending NLP request:', requestString)
-
-      setContacting(true)
-
-      const subscription = serviceStub
-        .createRequestResponseOperation<DetectIntentResponse[], string>(
-          'nlp-vlad',
-          'getNlpIntent',
-          requestString,
-        )
-        .pipe(
-          timeout(10000),
-          take(1),
-        )
-        .subscribe(
-          result => {
-            setContacting(false)
-            setResponse(result[0])
-          },
-          (err: any) => {
-            console.error(`Error in NLP request: ${err}`)
-            setContacting(false)
-          },
-        )
-
-      return () => subscription && subscription.unsubscribe()
-    }, [serviceStub])
 
     const handleOnKeyDown: KeyboardEventHandler<HTMLInputElement> = useCallback(e => {
       if (e.key === 'Enter' && response) {
